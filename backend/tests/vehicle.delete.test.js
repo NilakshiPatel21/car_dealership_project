@@ -4,7 +4,7 @@ const mongoose = require('mongoose');
 const jwt = require('jsonwebtoken');
 const app = require('../src/app');
 const User = require('../src/models/User');
-const Vehicle = require('../src/models/Vehicle');
+const Vehicle = require('../src/models/vehicle');
 const { JWT_SECRET } = require('../src/config/jwt');
 require('dotenv').config();
 

@@ -80,5 +80,26 @@ const updateVehicle = async (req, res) => {
   }
 };
 
-module.exports = { createVehicle, getVehicles, searchVehicles, updateVehicle };
+const deleteVehicle = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({ message: 'Invalid vehicle id' });
+    }
+
+    const vehicle = await Vehicle.findByIdAndDelete(id);
+
+    if (!vehicle) {
+      return res.status(404).json({ message: 'Vehicle not found' });
+    }
+
+    res.status(200).json({ message: 'Vehicle deleted successfully' });
+  } catch (err) {
+    res.status(500).json({ message: 'Server error', error: err.message });
+  }
+};
+
+
+module.exports = { createVehicle, getVehicles, searchVehicles, updateVehicle, deleteVehicle };
 
