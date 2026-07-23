@@ -127,6 +127,35 @@ const purchaseVehicle = async (req, res) => {
   }
 };
 
-module.exports = { createVehicle, getVehicles, searchVehicles, updateVehicle, deleteVehicle, purchaseVehicle };
+const restockVehicle = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { amount } = req.body;
+
+    if (!isValidObjectId(id)) {
+      return res.status(400).json({ message: 'Invalid vehicle id' });
+    }
+
+    if (amount === undefined || amount <= 0) {
+      return res.status(400).json({ message: 'amount must be a positive number' });
+    }
+
+    const vehicle = await Vehicle.findById(id);
+    if (!vehicle) {
+      return res.status(404).json({ message: 'Vehicle not found' });
+    }
+
+    vehicle.quantity += amount;
+    await vehicle.save();
+
+    res.status(200).json(vehicle);
+  } catch (err) {
+    res.status(500).json({ message: 'Server error', error: err.message });
+  }
+};
+
+
+
+module.exports = { createVehicle, getVehicles, searchVehicles, updateVehicle, deleteVehicle, purchaseVehicle , restockVehicle};
 
 
