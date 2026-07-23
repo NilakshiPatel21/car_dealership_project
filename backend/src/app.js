@@ -3,6 +3,7 @@ const authRoutes = require('./routes/authRoutes');
 
 const app = express();
 
+// Parse incoming JSON bodies
 app.use(express.json());
 
 app.use('/api/auth', authRoutes);
