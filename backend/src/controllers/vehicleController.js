@@ -1,6 +1,7 @@
 const mongoose = require('mongoose');
 const Vehicle = require('../models/vehicle');
 
+const isValidObjectId = (id) => mongoose.Types.ObjectId.isValid(id);
 const createVehicle = async (req, res) => {
   try {
     const { make, model, category, price, quantity } = req.body;
@@ -53,7 +54,7 @@ const updateVehicle = async (req, res) => {
   try {
     const { id } = req.params;
 
-    if (!mongoose.Types.ObjectId.isValid(id)) {
+    if (!isValidObjectId(id)) {
       return res.status(400).json({ message: 'Invalid vehicle id' });
     }
 
@@ -84,7 +85,7 @@ const deleteVehicle = async (req, res) => {
   try {
     const { id } = req.params;
 
-    if (!mongoose.Types.ObjectId.isValid(id)) {
+    if (!isValidObjectId(id)) {
       return res.status(400).json({ message: 'Invalid vehicle id' });
     }
 

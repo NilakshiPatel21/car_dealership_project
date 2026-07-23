@@ -22,9 +22,9 @@ beforeAll(async () => {
   await mongoose.connect(MONGO_URI);
 }, 60000);
 
-//afterEach(async () => {
-  //await User.deleteMany({});
-//});
+afterEach(async () => {
+  await User.deleteMany({});
+});
 
 afterAll(async () => {
   await mongoose.connection.close();

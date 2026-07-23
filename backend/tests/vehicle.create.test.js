@@ -30,8 +30,19 @@ describe('POST /api/vehicles', () => {
   let customerToken, adminToken;
 
   beforeEach(async () => {
-    const customer = await User.create({ name: 'Cust', email: 'cust@example.com', password: 'password123', role: 'customer' });
-    const admin = await User.create({ name: 'Admin', email: 'admin2@example.com', password: 'password123', role: 'admin' });
+    const customer = await User.create({
+       name: 'Cust',
+        email: 'cust@example.com', 
+        password: 'password123', 
+        role: 'customer' 
+      });
+    
+      const admin = await User.create({
+       name: 'Admin', 
+       email: 'admin2@example.com', 
+       password: 'password123', 
+       role: 'admin' 
+      });
     customerToken = jwt.sign({ id: customer._id }, JWT_SECRET);
     adminToken = jwt.sign({ id: admin._id }, JWT_SECRET);
   });
