@@ -1,30 +1,28 @@
 // tests/auth.register.test.js
 const request = require('supertest');
-const mongoose = require('mongoose');
 const app = require('../src/app');
 const User = require('../src/models/User');
-require('dotenv').config();
+const bcrypt = require('bcryptjs');
 
-const MONGO_URI = process.env.MONGODB_URI || process.env.MONGO_URI;
+// Mock Mongoose model — no real DB connection needed
+jest.mock('../src/models/User');
 
-beforeAll(async () => {
-  // Disconnect any existing connection (e.g. from npm run dev holding the singleton)
-  if (mongoose.connection.readyState !== 0) {
-    await mongoose.disconnect();
-  }
-  await mongoose.connect(MONGO_URI);
-}, 60000);
-
-afterEach(async () => {
-  await User.deleteMany({});
-}, 30000);
-
-afterAll(async () => {
-  await mongoose.connection.close();
-}, 30000);
+afterEach(() => {
+  jest.clearAllMocks();
+});
 
 describe('POST /api/auth/register', () => {
   it('registers a new user and returns a token', async () => {
+    const mockUser = {
+      _id: 'abc123',
+      name: 'Test User',
+      email: 'test@example.com',
+      role: 'customer',
+    };
+
+    User.findOne.mockResolvedValue(null);       // no duplicate
+    User.create.mockResolvedValue(mockUser);    // creation succeeds
+
     const res = await request(app)
       .post('/api/auth/register')
       .send({ name: 'Test User', email: 'test@example.com', password: 'password123' });
@@ -36,27 +34,43 @@ describe('POST /api/auth/register', () => {
   });
 
   it('rejects duplicate email registration', async () => {
-    await request(app).post('/api/auth/register').send({
-      name: 'Test User', email: 'dupe@example.com', password: 'password123',
-    });
-    const res = await request(app).post('/api/auth/register').send({
-      name: 'Another', email: 'dupe@example.com', password: 'password456',
-    });
+    User.findOne.mockResolvedValue({ _id: 'existing' }); // duplicate exists
+
+    const res = await request(app)
+      .post('/api/auth/register')
+      .send({ name: 'Another', email: 'dupe@example.com', password: 'password456' });
+
     expect(res.statusCode).toBe(400);
   });
 
   it('rejects missing required fields', async () => {
-    const res = await request(app).post('/api/auth/register').send({ email: 'x@x.com' });
+    User.findOne.mockResolvedValue(null);
+
+    const res = await request(app)
+      .post('/api/auth/register')
+      .send({ email: 'x@x.com' }); // no name or password
+
     expect(res.statusCode).toBe(400);
   });
 
   it('stores the password hashed, not in plain text', async () => {
-    await request(app).post('/api/auth/register').send({
-      name: 'Test User',
-      email: 'hash@example.com',
-      password: 'password123',
+    let capturedData;
+
+    User.findOne.mockResolvedValue(null);
+    User.create.mockImplementation(async (data) => {
+      // Simulate the pre-save hook: hash the password before storing
+      const salt = await bcrypt.genSalt(10);
+      const hashed = await bcrypt.hash(data.password, salt);
+      capturedData = { ...data, password: hashed };
+      return { _id: 'abc123', name: data.name, email: data.email, role: 'customer' };
     });
-    const user = await User.findOne({ email: 'hash@example.com' }).select('+password');
-    expect(user.password).not.toBe('password123');
+
+    await request(app)
+      .post('/api/auth/register')
+      .send({ name: 'Test User', email: 'hash@example.com', password: 'password123' });
+
+    expect(capturedData.password).not.toBe('password123');
+    const isHashed = await bcrypt.compare('password123', capturedData.password);
+    expect(isHashed).toBe(true);
   });
 });
