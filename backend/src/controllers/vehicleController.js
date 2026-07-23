@@ -1,3 +1,4 @@
+const mongoose = require('mongoose');
 const Vehicle = require('../models/vehicle');
 
 const createVehicle = async (req, res) => {
@@ -48,5 +49,36 @@ const searchVehicles = async (req, res) => {
   }
 };
 
+const updateVehicle = async (req, res) => {
+  try {
+    const { id } = req.params;
 
-module.exports = { createVehicle, getVehicles, searchVehicles };
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({ message: 'Invalid vehicle id' });
+    }
+
+    const { price, quantity } = req.body;
+    if (price !== undefined && price < 0) {
+      return res.status(400).json({ message: 'price must not be negative' });
+    }
+    if (quantity !== undefined && quantity < 0) {
+      return res.status(400).json({ message: 'quantity must not be negative' });
+    }
+
+    const vehicle = await Vehicle.findByIdAndUpdate(id, req.body, {
+      new: true,
+      runValidators: true,
+    });
+
+    if (!vehicle) {
+      return res.status(404).json({ message: 'Vehicle not found' });
+    }
+
+    res.status(200).json(vehicle);
+  } catch (err) {
+    res.status(500).json({ message: 'Server error', error: err.message });
+  }
+};
+
+module.exports = { createVehicle, getVehicles, searchVehicles, updateVehicle };
+
