@@ -12,15 +12,15 @@ role-based access control (customer/admin), and complete vehicle CRUD + inventor
 car-dealership/
 └── backend/
 ├── src/
-│ ├── config/ # JWT config
-│ ├── controllers/ # Route handler logic
-│ ├── middleware/ # Auth (protect/adminOnly), error handling, 404
-│ ├── models/ # Mongoose schemas (User, Vehicle)
-│ ├── routes/ # Express route definitions
-│ ├── utils/ # AppError class
-│ ├── app.js # Express app config (no listen — used by tests)
-│ └── server.js # Real entrypoint (connects DB, starts server)
-└── tests/ # Jest + Supertest test suites
+│ ├── config/       # JWT config
+│ ├── controllers/  # Route handler logic
+│ ├── middleware/   # Auth (protect/adminOnly), error handling, 404
+│ ├── models/       # Mongoose schemas (User, Vehicle)
+│ ├── routes/       # Express route definitions
+│ ├── utils/        # AppError class
+│ ├── app.js        # Express app config (no listen — used by tests)
+│ └── server.js     # Real entrypoint (connects DB, starts server)
+└── tests/          # Jest + Supertest test suites
 
 ## Backend Setup & Local Run Instructions
 
