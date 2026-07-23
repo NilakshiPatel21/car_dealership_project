@@ -101,6 +101,32 @@ const deleteVehicle = async (req, res) => {
   }
 };
 
+const purchaseVehicle = async (req, res) => {
+  try {
+    const { id } = req.params;
 
-module.exports = { createVehicle, getVehicles, searchVehicles, updateVehicle, deleteVehicle };
+    if (!isValidObjectId(id)) {
+      return res.status(400).json({ message: 'Invalid vehicle id' });
+    }
+
+    const vehicle = await Vehicle.findById(id);
+    if (!vehicle) {
+      return res.status(404).json({ message: 'Vehicle not found' });
+    }
+
+    if (vehicle.quantity <= 0) {
+      return res.status(400).json({ message: 'Vehicle is out of stock' });
+    }
+
+    vehicle.quantity -= 1;
+    await vehicle.save();
+
+    res.status(200).json(vehicle);
+  } catch (err) {
+    res.status(500).json({ message: 'Server error', error: err.message });
+  }
+};
+
+module.exports = { createVehicle, getVehicles, searchVehicles, updateVehicle, deleteVehicle, purchaseVehicle };
+
 
