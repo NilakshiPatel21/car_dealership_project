@@ -1,10 +1,10 @@
 const express = require('express');
-const { createVehicle } = require('../controllers/vehicleController');
+const router = express.Router();
+const { createVehicle, getVehicles, searchVehicles } = require('../controllers/vehicleController');
 const { protect } = require('../middleware/auth');
 
-const router = express.Router();
-
-// Any logged-in user can create a vehicle
+router.get('/search', protect, searchVehicles);
+router.get('/', protect, getVehicles);
 router.post('/', protect, createVehicle);
 
 module.exports = router;

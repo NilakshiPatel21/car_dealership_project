@@ -18,4 +18,35 @@ const createVehicle = async (req, res) => {
   }
 };
 
-module.exports = { createVehicle };
+const getVehicles = async (req, res) => {
+  try {
+    const vehicles = await Vehicle.find();
+    res.status(200).json(vehicles);
+  } catch (err) {
+    res.status(500).json({ message: 'Server error', error: err.message });
+  }
+};
+
+const searchVehicles = async (req, res) => {
+  try {
+    const { make, model, category, minPrice, maxPrice } = req.query;
+    const filter = {};
+
+    if (make) filter.make = new RegExp(make, 'i');
+    if (model) filter.model = new RegExp(model, 'i');
+    if (category) filter.category = new RegExp(category, 'i');
+    if (minPrice || maxPrice) {
+      filter.price = {};
+      if (minPrice) filter.price.$gte = Number(minPrice);
+      if (maxPrice) filter.price.$lte = Number(maxPrice);
+    }
+
+    const vehicles = await Vehicle.find(filter);
+    res.status(200).json(vehicles);
+  } catch (err) {
+    res.status(500).json({ message: 'Server error', error: err.message });
+  }
+};
+
+
+module.exports = { createVehicle, getVehicles, searchVehicles };
